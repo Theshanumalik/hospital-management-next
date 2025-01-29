@@ -15,7 +15,7 @@ const StatsItem = ({ icon, label, value }: StatsItemProps) => {
         <FaPlus size={16} />
         {value}
       </span>
-      <CardTitle className="flex gap-2 text-lg items-center text-muted-foreground">
+      <CardTitle className="flex gap-2 text-sm items-center text-gray-700 font-normal">
         {icon} {label}
       </CardTitle>
     </Card>

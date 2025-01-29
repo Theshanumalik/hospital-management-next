@@ -1,72 +1,96 @@
 "use client";
-import { cn } from "@/lib/utils";
-import { DashboardIcon } from "@radix-ui/react-icons";
-import { ClassValue } from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { FaPeopleGroup, FaStethoscope, FaUserDoctor } from "react-icons/fa6";
+import {
+  SquareDashed,
+  User2Icon,
+  Stethoscope,
+  GroupIcon,
+  HospitalIcon,
+  Calendar,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import RolePass from "@/components/layout/RolePass";
+import { Role } from "@/types";
 
-type SidebarItemProps = {
-  href: string;
-  icon?: React.ReactNode;
-  label?: React.ReactNode;
-};
-const SidebarItem = ({ href, icon, label }: SidebarItemProps) => {
+const SidebarNav = () => {
   const pathname = usePathname();
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center gap-2 px-4 py-3 transition-colors hover:bg-gray-100 rounded-full my-2",
-        {
-          "bg-gray-100 text-blue-500": pathname.startsWith(href),
-        }
-      )}
-    >
-      {icon}
-      {label}
-    </Link>
-  );
-};
-
-const Sidebar = ({ className }: { className?: ClassValue }) => {
-  const sidebarItems: SidebarItemProps[] = [
+  const sidebarItems = [
     {
       href: "/dashboard",
-      icon: <DashboardIcon />,
+      icon: SquareDashed,
       label: "Dashboard",
+      role: "all",
     },
     {
       href: "/admin/doctors",
-      icon: <FaUserDoctor />,
+      icon: User2Icon,
       label: "doctors",
+      role: "admin",
     },
     {
       href: "/admin/departments",
-      icon: <FaUserDoctor />,
+      icon: HospitalIcon,
       label: "departments",
+      role: "admin",
     },
     {
       href: "/dashboard/appointments",
-      icon: <FaStethoscope />,
+      icon: Stethoscope,
       label: "Appointments",
+      role: "doctor",
     },
     {
       href: "/admin/users",
-      icon: <FaPeopleGroup />,
+      icon: GroupIcon,
       label: "Users",
+      role: "admin",
+    },
+    {
+      href: "/doctor/schedule",
+      icon: Calendar,
+      label: "Schedule",
+      role: "admin",
     },
   ];
   return (
-    <aside className={cn("w-72 border-r p-2", className)}>
-      <div className="my-4 px-2">
-        {sidebarItems.map((data) => (
-          <SidebarItem {...data} key={data.href} />
-        ))}
-      </div>
-    </aside>
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sidebarItems.map((item) => (
+                <RolePass key={item.label} role={item.role as Role}>
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span className="capitalize">{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </RolePass>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
-export default Sidebar;
+export default SidebarNav;

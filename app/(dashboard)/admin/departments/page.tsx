@@ -6,6 +6,7 @@ import DepartmentCard from "../_components/department-card";
 import { z } from "zod";
 import { departmentSchema } from "@/lib/schema";
 import toast from "react-hot-toast";
+import RolePass from "@/components/layout/RolePass";
 
 type DepartmentListType = {
   _id: string;
@@ -44,16 +45,18 @@ const DepartmentsPage = () => {
     });
   };
   return (
-    <div className="p-3 bg-white max-w-2xl mx-auto rounded-lg px-4">
-      <h1 className="font-semibold my-4">Departments</h1>
-      <DepartmentForm onSubmit={onSubmit} />
+    <RolePass role="admin">
+      <div className="p-3 bg-white max-w-2xl mx-auto rounded-lg px-4">
+        <h1 className="font-semibold my-4">Departments</h1>
+        <DepartmentForm onSubmit={onSubmit} />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {departmentList.map((department) => (
-          <DepartmentCard key={department._id} {...department} />
-        ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {departmentList.map((department) => (
+            <DepartmentCard key={department._id} {...department} />
+          ))}
+        </div>
       </div>
-    </div>
+    </RolePass>
   );
 };
 

@@ -21,7 +21,6 @@ import Link from "next/link";
 import PersonalInformation from "./_steps/personal-information";
 import ContactInformation from "./_steps/contact-information";
 import DepartmentalInformation from "./_steps/departmental-information";
-import { MouseEventHandler } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 

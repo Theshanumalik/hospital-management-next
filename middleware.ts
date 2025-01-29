@@ -12,8 +12,6 @@ export default middleware((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  console.log("Middleware invoked!");
-
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -37,11 +35,5 @@ export default middleware((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
-
-// export default function name(req: NextRequest) {
-//   console.log("Middleware");
-
-//   return NextResponse.next();
-// }

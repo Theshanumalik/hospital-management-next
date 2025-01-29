@@ -16,35 +16,20 @@ export const GET = catchAsyncError(async (req: NextRequest) => {
 
   const doctors = await Doctor.aggregate([
     {
-      $lookup: {
-        from: "departments",
-        localField: "department",
-        foreignField: "_id",
-        as: "department",
-      },
-    },
-    {
-      $unwind: "$department",
+      $sort: { createdAt: -1 },
     },
     {
       $project: {
-        _id: 1,
         firstname: 1,
         lastname: 1,
-        email: 1,
-        department: "$department.name",
-        consultationFee: 1,
         avatar: 1,
-        createdAt: 1,
+        department: 1,
+        _id: 1,
       },
-    },
-    {
-      $sort: { createdAt: -1 },
     },
   ])
     .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 });
+    .limit(limit);
   return NextResponse.json(doctors);
 });
 
@@ -58,36 +43,4 @@ export const POST = catchAsyncError(async (req: NextRequest) => {
     });
   }
   return NextResponse.json(newDoctor, { status: 200, statusText: "ok" });
-});
-
-export const PUT = catchAsyncError(async (req: NextRequest) => {
-  const data = await req.json();
-  const searchParams = req.nextUrl.searchParams;
-  const doctorId = searchParams.get("doctorId");
-  if (!doctorId) {
-    throw new CustomError("Doctor ID is required!", 400);
-  }
-  await dbConnect();
-  const doctor = await Doctor.findByIdAndUpdate(doctorId, data, {
-    new: true,
-    runValidators: true,
-  });
-  if (!doctor) {
-    throw new CustomError("Doctor not found!", 404);
-  }
-  return NextResponse.json(doctor);
-});
-
-export const DELETE = catchAsyncError(async (req: NextRequest) => {
-  const searchParams = req.nextUrl.searchParams;
-  const doctorId = searchParams.get("doctorId");
-  if (!doctorId) {
-    throw new CustomError("Doctor ID is required!", 400);
-  }
-  await dbConnect();
-  const doctor = await Doctor.findByIdAndDelete(doctorId);
-  if (!doctor) {
-    throw new CustomError("Doctor not found!", 404);
-  }
-  return NextResponse.json("Doctor deleted successfully!");
 });

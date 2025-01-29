@@ -5,6 +5,8 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/authContext";
 import { AppointmentProvider } from "@/context/appointmentContext";
 import ProgressProvider from "@/components/layout/ProgressProvider";
+import ReactQueryProvider from "@/context/react-query-context";
+import { DepartmentProvider } from "@/context/departments-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,14 +19,18 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AppointmentProvider>
-          <AuthProvider>
-            <ProgressProvider>
-              {children}
-              <Toaster />
-            </ProgressProvider>
-          </AuthProvider>
-        </AppointmentProvider>
+        <ReactQueryProvider>
+          <DepartmentProvider>
+            <AppointmentProvider>
+              <AuthProvider>
+                <ProgressProvider>
+                  {children}
+                  <Toaster />
+                </ProgressProvider>
+              </AuthProvider>
+            </AppointmentProvider>
+          </DepartmentProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

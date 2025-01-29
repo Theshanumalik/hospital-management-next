@@ -1,18 +1,23 @@
 import React from "react";
 import Navbar from "./_components/navbar";
 import Sidebar from "./_components/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-      <Navbar />
-      <div className="flex h-[calc(100vh-70px)]">
-        <Sidebar className={"hidden lg:block py-4"} />
-        <div className="flex-1 p-2 bg-gray-100 min-h-full overflow-x-auto">
-          {children}
-        </div>
-      </div>
-    </>
+    <div>
+      <SidebarProvider>
+        <Sidebar />
+        <SidebarInset>
+          <div className="h-[calc(100vh-70px)]">
+            <Navbar />
+            <div className="flex-1 p-3 bg-gray-50 min-h-full overflow-x-auto">
+              {children}
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 };
 

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { ClassValue } from "clsx";
 import { cn } from "@/lib/utils";
+import { Edit, Plus } from "lucide-react";
 
 type EditableImageProps = {
   link: string | undefined;
@@ -17,7 +18,6 @@ export default function EditableImage({
   onChange,
   className,
 }: EditableImageProps) {
-  const [file, setFile] = useState(link || null);
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData();
     if (!e.target?.files) return;
@@ -28,7 +28,6 @@ export default function EditableImage({
         .then((res) => {
           if (res.data.url) {
             onChange(res.data.url);
-            setFile(res.data.url);
             resolve(void 0);
           }
         })
@@ -44,26 +43,23 @@ export default function EditableImage({
   };
   return (
     <div className={cn("grid place-items-center overflow-hidden", className)}>
-      {file && (
+      {link && (
         <Image
-          src={file}
+          src={link}
           alt="Profile Image"
           width={200}
           height={200}
-          className="rounded-md object-cover"
-          priority={true}
+          className="rounded-md object-cover w-40 h-40"
         />
       )}
       <label
         htmlFor="image"
-        className={cn({
-          "block w-full text-center py-2 border rounded-md my-2 bg-gray-200 text-gray-600 cursor-pointer":
-            file,
-          "w-28 h-28 rounded-full bg-gray-200 text-gray-600 cursor-pointer flex items-center justify-center p-3 text-center mx-auto":
-            !file,
-        })}
+        className={cn(
+          "border border-gray-500 p-2 text-sm rounded-xl my-2 flex items-center cursor-pointer hover:bg-gray-50"
+        )}
       >
-        {file ? "Change Image" : "Upload Image"}
+        {link ? <Edit size={16} /> : <Plus size={16} />}
+        <span className="mr-2 ml-1">{link ? "Change Image" : "Image"}</span>
       </label>
       <input
         type="file"

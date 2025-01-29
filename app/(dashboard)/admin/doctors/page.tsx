@@ -1,135 +1,86 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  FaCircleDot,
-  FaEllipsisVertical,
-  FaPen,
-  FaPlus,
-  FaUserDoctor,
-} from "react-icons/fa6";
-import { useFetch } from "@/hooks/useFetch";
-import { getFullName } from "@/lib/utils";
 import Link from "next/link";
-
-type Doctor = {
-  _id: string;
-  firstname: string;
-  lastname?: string;
-  department: string;
-  role: string;
-  email: string;
-};
+import { useQuery } from "react-query";
+import axios from "axios";
+import { DoctorCardProps } from "@/types";
+import DoctorCard from "../_components/doctor-card";
+import { useState } from "react";
+import DoctorTray from "../_components/doctor-tray";
+import { AnimatePresence, motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const AllDoctorsList = () => {
-  const doctors = useFetch<Doctor[]>("/api/doctor");
+  const router = useRouter();
+  const { isLoading, data } = useQuery(["doctor"], async () => {
+    const res = await axios.get("/api/doctor");
+    return res.data as DoctorCardProps[];
+  });
 
-  if (doctors.loading) {
+  const [activeDoctor, setActiveDoctor] = useState<string>();
+
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
+  const handleActiveDoctor = (id: string) => {
+    if (data === undefined) return;
+    setActiveDoctor(id);
+  };
+
+  const handleDoctorTrayClose = () => {
+    setActiveDoctor(undefined);
+  };
+
   return (
-    <div className="bg-white p-4 px-5 h-full">
-      <header className="flex justify-between my-6">
-        <h1 className="text-lg flex gap-2 items-center">
-          <FaUserDoctor size={24} /> Doctors List
-        </h1>
-        <div>
-          <Link
-            href="/admin/doctors/new"
-            className="bg-blue-500 flex text-white items-center gap-2 px-4 py-2 rounded-md ps-3 hover:bg-blue-600 transition-colors"
+    <div className="p-4 px-5 h-full w-full">
+      <nav className="mb-3 flex justify-between items-center gap-4">
+        <div className="flex gap-2 w-full max-w-xl">
+          <Button
+            variant={"primary"}
+            size={"icon"}
+            className="p-2"
+            onClick={() => router.back()}
           >
-            <FaPlus /> New Doctor
-          </Link>
+            <ArrowLeft />
+          </Button>
+          <Input type="text" placeholder="Search" className="flex-1 bg-white" />
         </div>
-      </header>
-      <section>
-        <Table>
-          <TableCaption>Doctors Available in the Hospital</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {doctors?.data?.map((doctor) => (
-              <TableRow key={doctor._id}>
-                <TableCell>{doctor._id}</TableCell>
-                <TableCell>
-                  {getFullName(doctor.firstname, doctor.lastname)}
-                </TableCell>
-                <TableCell>{doctor.department}</TableCell>
-                <TableCell>{doctor.email}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant={"ghost"}
-                        className="rounded-md h-10 w-10"
-                      >
-                        <FaEllipsisVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-48">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <Link
-                            href={"/admin/doctors/edit/" + doctor._id}
-                            className="flex items-center gap-2"
-                          >
-                            <FaPen /> Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <button className="flex items-center gap-2">
-                            <FaCircleDot className="text-green-500" /> Activate
-                          </button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <button className="flex items-center gap-2">
-                            <FaCircleDot className="text-red-500" /> Deactivate
-                          </button>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <button className="flex items-center gap-2">
-                            <FaCircleDot className="text-red-500" /> Delete
-                          </button>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+        <Link
+          href="/admin/doctors/new"
+          className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md"
+        >
+          <Plus /> Doctor
+        </Link>
+      </nav>
+      <AnimatePresence>
+        <section className="flex gap-6 items-start overflow-hidden relative w-full">
+          <motion.div
+            className="grow flex-wrap gap-4 flex"
+            layout={"size"}
+            transition={{
+              duration: 0.4,
+              ease: "easeInOut",
+            }}
+          >
+            {data?.map((doctor) => (
+              <DoctorCard
+                key={doctor._id}
+                {...doctor}
+                onClick={handleActiveDoctor}
+                active={activeDoctor === doctor._id}
+              />
             ))}
-          </TableBody>
-        </Table>
-      </section>
+          </motion.div>
+          {activeDoctor && (
+            <div className="max-w-xl w-full">
+              <DoctorTray _id={activeDoctor} close={handleDoctorTrayClose} />
+            </div>
+          )}
+        </section>
+      </AnimatePresence>
     </div>
   );
 };

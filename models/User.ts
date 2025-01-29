@@ -78,6 +78,7 @@ userSchema.methods.comparePassword = async function (
 userSchema.pre<IUserDoc>("save", async function (next) {
   if (!this.isModified("password")) {
     next();
+    return;
   }
   let salt = await bcrypt.genSalt(10);
   let hashedPassword = await bcrypt.hash(this.password, salt);

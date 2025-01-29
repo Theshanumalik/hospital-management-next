@@ -22,4 +22,10 @@ export const apiAuthPrefix = "/api/auth";
  * This is the default redirect route after login
  * @type {string}
  */
+
+/**
+ * These are routes that are only accessible to admin users
+ */
+export const adminRoutePrefix = "/admin";
+
 export const DEFAULT_LOGIN_REDIRECT = "/dashboard";

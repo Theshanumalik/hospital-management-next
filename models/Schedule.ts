@@ -1,7 +1,8 @@
 import { Document, model, Model, models, Schema, Types } from "mongoose";
 import Doctor from "./Doctor";
-import { CustomError } from "@/lib/utils";
 import { time24hrRegex } from "@/lib/schema";
+import { DayName } from "@/types";
+import { timezones } from "@/lib/constants";
 
 export interface ITimeSlot {
   startTime: string;
@@ -34,8 +35,10 @@ export const timeSlotSchema = new Schema<ITimeSlot, ITimeSlotDoc>({
 
 interface ISchedule {
   doctor: Types.ObjectId;
-  timeslots: ITimeSlot[];
-  days: (0 | 1 | 2 | 3 | 4 | 5 | 6)[];
+  bookingTimes: {
+    [key in DayName]: ITimeSlot[];
+  };
+  timezone: string;
 }
 
 interface IScheduleDoc extends ISchedule, Document {}
@@ -47,19 +50,22 @@ const scheduleSchema = new Schema<ISchedule, IScheduleModel>({
     type: Schema.Types.ObjectId,
     ref: "Doctor",
     required: true,
+    unique: true,
   },
-  days: {
-    type: [Number],
-    required: true,
-    validate: {
-      validator: function (v: (0 | 1 | 2 | 3 | 4 | 5 | 6)[]) {
-        return v.length > 0;
-      },
-      message: "At least one day must be selected",
-    },
-    maxlength: 7,
+  bookingTimes: {
+    monday: [timeSlotSchema],
+    tuesday: [timeSlotSchema],
+    wednesday: [timeSlotSchema],
+    thursday: [timeSlotSchema],
+    friday: [timeSlotSchema],
+    saturday: [timeSlotSchema],
+    sunday: [timeSlotSchema],
   },
-  timeslots: { type: [timeSlotSchema], required: true },
+  timezone: {
+    type: String,
+    enum: timezones,
+    default: "IST",
+  },
 });
 
 scheduleSchema.pre<IScheduleDoc>("save", async function (next) {
@@ -69,8 +75,7 @@ scheduleSchema.pre<IScheduleDoc>("save", async function (next) {
       if (!doctor) {
         return next(new Error("Invalid Doctor Id!"));
       }
-      doctor.schedule.push(this._id);
-      await doctor.save({ validateBeforeSave: true });
+      await doctor.setSchedule(this._id);
       next();
     }
   } catch (error) {
@@ -78,57 +83,31 @@ scheduleSchema.pre<IScheduleDoc>("save", async function (next) {
   }
 });
 
-scheduleSchema.pre<IScheduleDoc>("save", async function (next) {
-  if (!this.isNew) {
-    return next();
-  }
+// scheduleSchema.pre<IScheduleDoc>("save", function (next) {
+//   if (this.isModified("timeslots")) {
+//     this.timeslots = this.timeslots.sort((a, b) => {
+//       const aStartTime = new Date(`01/01/2000 ${a.startTime}`);
+//       const bStartTime = new Date(`01/01/2000 ${b.startTime}`);
+//       return aStartTime.getTime() - bStartTime.getTime();
+//     });
+//   }
+//   next();
+// });
 
-  const daysScheduled: number[] = [];
-  const existingSchedules = await Schedule.find({ doctor: this.doctor });
-
-  for (const schedule of existingSchedules) {
-    for (const day of schedule.days) {
-      daysScheduled.push(day);
-    }
-  }
-
-  for (const day of this.days) {
-    if (daysScheduled.includes(day)) {
-      return next(new CustomError("Schedule already exists for this day", 400));
-    }
-  }
-
-  next();
-});
-
-scheduleSchema.pre<IScheduleDoc>("save", function (next) {
-  if (this.isModified("timeslots")) {
-    this.timeslots = this.timeslots.sort((a, b) => {
-      const aStartTime = new Date(`01/01/2000 ${a.startTime}`);
-      const bStartTime = new Date(`01/01/2000 ${b.startTime}`);
-      return aStartTime.getTime() - bStartTime.getTime();
-    });
-  }
-  next();
-});
-
-scheduleSchema.post<IScheduleDoc>(
-  "findOneAndDelete",
-  async function (schedule: IScheduleDoc) {
-    try {
-      const doctor = await Doctor.findById(schedule.doctor);
-      if (!doctor) {
-        return;
-      }
-      doctor.schedule = doctor.schedule.filter(
-        (scheduleId) => scheduleId.toString() !== schedule._id.toString()
-      );
-      await doctor.save({ validateBeforeSave: true });
-    } catch (error) {
-      console.error("Error removing schedule from doctor:", error);
-    }
-  }
-);
+// scheduleSchema.post<IScheduleDoc>(
+//   "findOneAndDelete",
+//   async function (schedule: IScheduleDoc) {
+//     try {
+//       const doctor = await Doctor.findById(schedule.doctor);
+//       if (!doctor) {
+//         return;
+//       }
+//       await doctor.save({ validateBeforeSave: true });
+//     } catch (error) {
+//       console.error("Error removing schedule from doctor:", error);
+//     }
+//   }
+// );
 
 const Schedule: IScheduleModel =
   (models.Schedule as IScheduleModel) ||

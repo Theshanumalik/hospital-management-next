@@ -13,7 +13,11 @@ async function uploadMedia(file: File): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
-        {},
+        {
+          quality: "auto",
+          format: "jpg",
+          transformation: [{ width: 800, height: 800, crop: "limit" }],
+        },
         function (err: UploadApiErrorResponse, result: UploadApiResponse) {
           if (err) {
             reject(err);

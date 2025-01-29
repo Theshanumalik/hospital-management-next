@@ -18,11 +18,9 @@ export default {
           },
           body: JSON.stringify(credentials),
         });
-        console.log({ res });
         if (res.status === 200) {
           return await res.json();
         }
-
         return null;
       },
     }),
@@ -30,5 +28,27 @@ export default {
   debug: process.env.NODE_ENV === "development",
   pages: {
     signIn: "/sign-in",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.name = user.name;
+        token.role = user.role;
+        token.sub = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.role) {
+        session.user.role = token.role;
+      }
+      if (token.name) {
+        session.user.name = token.name;
+      }
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
   },
 } satisfies NextAuthConfig;

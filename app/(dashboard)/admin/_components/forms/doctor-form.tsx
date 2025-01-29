@@ -1,21 +1,20 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { doctorSchema } from "@/lib/schema";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { RotateCcw, Save, Loader } from "lucide-react";
+import EditableImage from "../forms/image-editable";
 import {
   Select,
   SelectContent,
@@ -23,190 +22,190 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { doctorSchema } from "@/lib/schema";
+import { useDepartments } from "@/context/departments-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import EditableImage from "./image-editable";
-import { useAppointment } from "@/context/appointmentContext";
+
+type DoctorFormData = z.infer<typeof doctorSchema>;
 
 type DoctorFormProps = {
-  title: React.ReactNode;
-  description: React.ReactNode;
-  onSubmit: () => void;
-  data?: DoctorFormFields;
+  data: DoctorFormData;
+  onSubmit: (values: DoctorFormData) => void;
 };
 
-type DoctorFormFields = z.infer<typeof doctorSchema>;
-
-type Department = {
-  _id: string;
-  name: string;
-};
-
-const DoctorForm = ({
-  title,
-  description,
-  onSubmit,
-  data,
-}: DoctorFormProps) => {
-  const form = useForm<DoctorFormFields>({
-    resolver: zodResolver(doctorSchema),
+const DoctorForm = ({ data, onSubmit }: DoctorFormProps) => {
+  const { departments } = useDepartments();
+  const form = useForm<DoctorFormData>({
     defaultValues: {
-      firstname: data?.firstname || "",
-      lastname: data?.lastname || "",
-      email: data?.email || "",
-      department: data?.department || "",
+      firstname: data.firstname,
+      lastname: data.lastname,
+      department: data.department,
+      email: data.email,
+      consultationFee: data.consultationFee?.toString(),
+      avatar: data.avatar,
       contactInfo: {
-        phoneNumber: data?.contactInfo?.phoneNumber || "",
-        address: data?.contactInfo?.address || "",
+        address: data.contactInfo?.address,
+        phoneNumber: data.contactInfo?.phoneNumber,
       },
-      schedule: data?.schedule || [],
-      consultationFee: data?.consultationFee || "",
     },
+    resolver: zodResolver(doctorSchema),
   });
 
-  const { departmentList } = useAppointment();
-
+  const handleSubmit = (values: DoctorFormData) => {
+    onSubmit(values);
+    form.reset({ ...values }, { keepDirty: false });
+  };
   return (
-    <Card className="max-w-2xl mx-auto my-4">
-      <CardHeader>
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {" "}
-              <div>
-                <EditableImage
-                  link=""
-                  onChange={(link) => form.setValue("avatar", link)}
-                />
-              </div>
-              <div className="grid gap-2 grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="firstname"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your first name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastname"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your last name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="department"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Department</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select one of these department for doctor." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="capitalize">
-                        {departmentList.map((department) => (
-                          <SelectItem
-                            key={department._id}
-                            value={department._id}
-                          >
-                            {department.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contactInfo.phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your phone number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contactInfo.address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="consultationFee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Consultation Fee</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your consultation fee"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" size={"lg"}>
-                {data ? "Save Changes" : "Add Doctor"}
-              </Button>
-            </form>
-          </Form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <EditableImage
+          link={form.watch("avatar")}
+          onChange={(e) => form.setValue("avatar", e, { shouldDirty: true })}
+          className="place-items-start"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="firstname"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Firstname</FormLabel>
+                <FormControl>
+                  <Input placeholder="John" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastname"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lastname</FormLabel>
+                <FormControl>
+                  <Input placeholder="Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-      </CardContent>
-    </Card>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="example@abc.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {departments && (
+          <FormField
+            control={form.control}
+            name="department"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Department</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    form.setValue("department", value, { shouldDirty: true });
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a department form this list" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {departments.map((department) => (
+                      <SelectItem key={department._id} value={department._id}>
+                        {department?.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        <FormField
+          control={form.control}
+          name="consultationFee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Consultation Fee</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="1000"
+                  {...field}
+                  onChange={(e) =>
+                    form.setValue(
+                      "consultationFee",
+                      e.target.value.toString(),
+                      { shouldDirty: true }
+                    )
+                  }
+                />
+              </FormControl>
+              <FormDescription>Fee in INR</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="contactInfo.address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="123, Example Street" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="contactInfo.phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="1234567890" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex gap-2">
+          <Button type="submit" size={"lg"} disabled={!form.formState.isDirty}>
+            {form.formState.isSubmitting ? (
+              <Loader className="animate-spin" />
+            ) : (
+              <Save size={16} className="mr-1" />
+            )}{" "}
+            Save Changes
+          </Button>
+          <Button
+            variant={"destructive"}
+            size={"lg"}
+            type="button"
+            onClick={() => form.reset()}
+            disabled={!form.formState.isDirty}
+          >
+            <RotateCcw size={16} className="mr-1" /> Reset
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

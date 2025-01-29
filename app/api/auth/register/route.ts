@@ -13,11 +13,13 @@ export const POST = catchAsyncError(async (req: NextRequest) => {
 
   // Connect to the database
   await dbConnect();
-
+  console.log("I am colled");
   // Find existing user by email
   let user: HydratedDocument<IUser> | null = await User.findOne({
     email,
   }).select("+password +isVerified");
+
+  console.log({ user });
 
   // If user is found and verified, throw an error
   if (user && user.isVerified) {
@@ -31,6 +33,8 @@ export const POST = catchAsyncError(async (req: NextRequest) => {
     if (existingDoctor) {
       // Create a new user with the doctor role
       user = new User({ email, role: "doctor", password });
+      existingDoctor.user = user._id;
+      await existingDoctor.save();
     } else {
       throw new CustomError("Doctor is not registered in our system!", 400);
     }
