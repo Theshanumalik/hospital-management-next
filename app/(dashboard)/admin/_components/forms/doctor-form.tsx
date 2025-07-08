@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useDepartments } from "@/context/departments-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 
 type DoctorFormData = z.infer<typeof doctorSchema>;
 
@@ -54,6 +55,22 @@ const DoctorForm = ({ data, onSubmit }: DoctorFormProps) => {
     onSubmit(values);
     form.reset({ ...values }, { keepDirty: false });
   };
+
+  useEffect(() => {
+    form.reset({
+      firstname: data.firstname,
+      lastname: data.lastname,
+      department: data.department,
+      email: data.email,
+      consultationFee: data.consultationFee?.toString(),
+      avatar: data.avatar,
+      contactInfo: {
+        address: data.contactInfo?.address,
+        phoneNumber: data.contactInfo?.phoneNumber,
+      },
+    });
+  }, [data, form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">

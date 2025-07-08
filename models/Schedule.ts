@@ -1,6 +1,6 @@
 import { Document, model, Model, models, Schema, Types } from "mongoose";
 import Doctor from "./Doctor";
-import { time24hrRegex } from "@/lib/schema";
+import { timeFormat } from "@/lib/schema";
 import { DayName } from "@/types";
 import { timezones } from "@/lib/constants";
 
@@ -26,7 +26,7 @@ export const timeSlotSchema = new Schema<ITimeSlot, ITimeSlotDoc>({
     required: true,
     validate: {
       validator: function (v: string) {
-        return time24hrRegex.test(v);
+        return timeFormat.test(v);
       },
       message: "Invalid time format",
     },

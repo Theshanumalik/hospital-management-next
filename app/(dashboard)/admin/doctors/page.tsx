@@ -39,7 +39,7 @@ const AllDoctorsList = () => {
       <nav className="mb-3 flex justify-between items-center gap-4">
         <div className="flex gap-2 w-full max-w-xl">
           <Button
-            variant={"primary"}
+            variant={"ghost"}
             size={"icon"}
             className="p-2"
             onClick={() => router.back()}
