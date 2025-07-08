@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@/context/authContext";
+import { AuthProvider } from "@/context/auth-context";
 import { AppointmentProvider } from "@/context/appointmentContext";
 import ProgressProvider from "@/components/layout/ProgressProvider";
 import ReactQueryProvider from "@/context/react-query-context";

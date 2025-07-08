@@ -69,6 +69,8 @@ const ScheduleForm = () => {
       form.setValue(`bookingTimes.${day}`, slots);
     });
   };
+
+  console.log(form.formState.errors);
   return (
     <div className="p-6 bg-white shadow rounded-xl max-w-3xl">
       <h1 className="font-semibold my-3 text-lg">Schedule</h1>
@@ -115,10 +117,12 @@ const ScheduleForm = () => {
                     form.setValue(`bookingTimes.${day as DayName}`, v)
                   }
                   onCopy={handleCopy}
-                  errors={form.formState.errors.bookingTimes?.[day as DayName]}
+                  error={
+                    form.formState.errors.bookingTimes?.[day as DayName]
+                      ?.message
+                  }
                 />
               ))}
-              <p>{form.formState.errors.bookingTimes?.message}</p>
             </div>
           </ScheduleProvider>
 

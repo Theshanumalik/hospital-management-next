@@ -25,12 +25,7 @@ type TimeslotProps = {
   values: TimeslotType[];
   onValueChange: (value: TimeslotType[]) => void;
   onCopy: (slots: TimeslotType[], days: DayName[]) => void;
-  errors?:
-    | Merge<
-        FieldError,
-        (Merge<FieldError, FieldErrorsImpl<TimeslotType>> | undefined)[]
-      >
-    | undefined;
+  error: string | undefined;
 };
 
 const getNextSlot = (lastSlot: TimeslotType): TimeslotType => {
@@ -48,7 +43,7 @@ const defaultSlot: TimeslotType = {
 const Timeslot = ({
   day,
   values,
-  errors,
+  error,
   onValueChange,
   onCopy,
 }: TimeslotProps) => {
@@ -93,7 +88,9 @@ const Timeslot = ({
           id={`day-switch-${day}`}
         />
         <Label
-          className="capitalize font-normal ml-3"
+          className={cn("capitalize font-normal ml-3", {
+            "text-red-500": error,
+          })}
           htmlFor={`day-switch-${day}`}
         >
           {day}
@@ -107,11 +104,17 @@ const Timeslot = ({
                 <TimePicker
                   value={value.startTime}
                   onValueChange={(v) => handleUpdate(index, "startTime", v)}
+                  className={cn({
+                    "border-red-500": error,
+                  })}
                 />
                 <Minus />
                 <TimePicker
                   value={value.endTime}
                   onValueChange={(v) => handleUpdate(index, "endTime", v)}
+                  className={cn({
+                    "border-red-500": error,
+                  })}
                 />
               </div>
               <div className="grow flex items-center space-x-2 justify-start">
@@ -142,12 +145,10 @@ const Timeslot = ({
                   </Button>
                 )}
               </div>
-              {errors && errors[index] && (
-                <div>{JSON.stringify(errors[index], null, 2)}</div>
-              )}
             </div>
           </div>
         ))}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
     </div>
   );

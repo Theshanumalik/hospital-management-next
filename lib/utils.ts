@@ -59,36 +59,66 @@ export function generateToken(length = 6) {
   return Math.random().toString(20).substr(2, length);
 }
 
-export function getTimeIn12HourFormat(time: string) {
-  const [hour, minute] = time.split(":");
-  const suffix = +hour >= 12 ? "PM" : "AM";
-  const hour12 = +hour % 12 || 12;
-  return `${hour12}:${minute} ${suffix}`;
+export function convert12to24(time12h: string): string {
+  const match = time12h.match(/^(\d{1,2}):(\d{2})([ap]m)$/i);
+
+  if (!match) {
+    throw new Error('Invalid time format. Expected "HH:MMam" or "HH:MMpm"');
+  }
+
+  let [_, hoursStr, minutesStr, period] = match;
+  let hours = parseInt(hoursStr, 10);
+  const minutes = minutesStr.padStart(2, "0");
+
+  // Validate time components
+  if (hours < 0 || hours > 12 || minutesStr.length !== 2) {
+    throw new Error("Invalid time value");
+  }
+
+  // Convert hours
+  hours = (hours % 12) + (period.toLowerCase() === "pm" ? 12 : 0);
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
 
-export const timeOverlape = (
+/*
+  time slot sorting isn't working properly
+  startA and startB are not being generated correctly
+  this is because the date is not being set correctly
+*/
+export function timeOverlap(
   slots: { startTime: string; endTime: string }[]
-): boolean => {
-  const date = new Date().toDateString();
+): boolean {
+  // Convert all times to 24h format first
+  const normalizedSlots = slots.map((slot) => ({
+    startTime: convert12to24(slot.startTime),
+    endTime: convert12to24(slot.endTime),
+  }));
 
-  const sortedSlots = [...slots].sort((a, b) => {
-    const startA = new Date(`${date} ${a.startTime}`).getTime();
-    const startB = new Date(`${date} ${b.startTime}`).getTime();
-    return startA - startB;
+  // Create a reference date (time components will be ignored)
+  const referenceDate = new Date().toISOString().split("T")[0];
+
+  // Sort slots by start time (ascending)
+  const sortedSlots = [...normalizedSlots].sort((a, b) => {
+    return (
+      new Date(`${referenceDate} ${a.startTime}`).getTime() -
+      new Date(`${referenceDate} ${b.startTime}`).getTime()
+    );
   });
 
-  for (let i = 0; i < sortedSlots.length - 1; i++) {
-    const currentEndTime = new Date(
-      `${date} ${sortedSlots[i].endTime}`
+  // Check for overlaps
+  for (let i = 1; i < sortedSlots.length; i++) {
+    const prevEnd = new Date(
+      `${referenceDate} ${sortedSlots[i - 1].endTime}`
     ).getTime();
-    const nextStartTime = new Date(
-      `${date} ${sortedSlots[i + 1].startTime}`
+    const currStart = new Date(
+      `${referenceDate} ${sortedSlots[i].startTime}`
     ).getTime();
 
-    if (currentEndTime > nextStartTime) {
+    if (prevEnd > currStart) {
       return true;
     }
   }
 
   return false;
-};
+}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { timezones } from "./constants";
-import { timeOverlape } from "./utils";
+import { timeOverlap } from "./utils";
 
 // time formate hrs:min am/pm
 export const timeFormat = /^(0?[1-9]|1[0-2]):[0-5][0-9](am|pm)$/;
@@ -38,28 +38,26 @@ export const departmentSchema = z.object({
 export const scheduleSchema = z.object({
   doctor: z.string().min(1),
   bookingTimes: z.object({
-    monday: z.array(timeslotsSchema).refine((slots) => timeOverlape(slots), {
-      message: "Time overlap detected",
+    monday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
-    tuesday: z.array(timeslotsSchema).refine((slots) => !timeOverlape(slots), {
-      message: "Time overlap detected",
+    tuesday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
-    wednesday: z
-      .array(timeslotsSchema)
-      .refine((slots) => !timeOverlape(slots), {
-        message: "Time overlap detected",
-      }),
-    thursday: z.array(timeslotsSchema).refine((slots) => timeOverlape(slots), {
-      message: "Time overlap detected",
+    wednesday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
-    friday: z.array(timeslotsSchema).refine((slots) => timeOverlape(slots), {
-      message: "Time overlap detected",
+    thursday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
-    saturday: z.array(timeslotsSchema).refine((slots) => timeOverlape(slots), {
-      message: "Time overlap detected",
+    friday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
-    sunday: z.array(timeslotsSchema).refine((slots) => timeOverlape(slots), {
-      message: "Time overlap detected",
+    saturday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
+    }),
+    sunday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
+      message: "Error: some of the timeslots are overlapping!",
     }),
   }),
   timezones: z.enum(timezones),
@@ -111,3 +109,7 @@ export const registerSchema = z.object({
   isDoctor: z.boolean().optional(),
   password: z.string().min(4, "Password must be at least 4 characters"),
 });
+
+// function forbidDuplicate(times: { startTime: string; endTime: string; }[], ctx: z.RefinementCtx) {
+//   const overlap = timeOverlap(times)
+// }

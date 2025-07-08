@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { FormStep, useMultiStep } from "@/hooks/useMultiStep";
+import { FormStep, useMultiStep } from "@/hooks/use-multi-step";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import Link from "next/link";
 import PersonalInformation from "./_steps/personal-information";

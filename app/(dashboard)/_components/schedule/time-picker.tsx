@@ -70,13 +70,14 @@ const TimePicker = ({
   }, [selectedTime]);
 
   return (
-    <div className={cn("relative max-w-36", className)}>
+    <div className={cn("relative max-w-36")}>
       <Input
         placeholder={placeholder}
         value={selectedTime}
         onChange={handleChange}
         onFocus={() => setOpen(true)}
         ref={inputRef}
+        className={cn(className)}
       />
       {open && (
         <ul className="absolute z-10 w-full bg-white shadow rounded-xl mt-2 max-h-48 border overflow-y-auto p-2 space-y-1 no-scrollbar">
