@@ -1,13 +1,12 @@
 "use client";
 import { Calendar } from "@/components/ui/calendar";
 import React from "react";
-import { DateRange } from "react-day-picker";
 
 const Leaves = () => {
   const [date, setDate] = React.useState<Date[] | undefined>([new Date()]);
   return (
-    <div className="p-6 bg-white shadow rounded-xl flex-1">
-      <h1 className="font-semibold my-3 text-lg">Leaves</h1>
+    <div className="bg-white shadow rounded-xl flex-1">
+      <h1 className="font-semibold my-3 text-lg p-6">Leaves</h1>
 
       <Calendar
         mode="multiple"

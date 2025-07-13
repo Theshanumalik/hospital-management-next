@@ -45,7 +45,7 @@ const SidebarNav = () => {
       role: "admin",
     },
     {
-      href: "/dashboard/appointments",
+      href: "/doctor/appointments",
       icon: Stethoscope,
       label: "Appointments",
       role: "doctor",
