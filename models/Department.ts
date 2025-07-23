@@ -17,8 +17,10 @@ const departmentSchema = new Schema<IDepartment, IDepartmentModel>(
   { timestamps: true, versionKey: false }
 );
 
-const Department: IDepartmentModel =
-  (models.Department as IDepartmentModel) ||
-  model<IDepartment, IDepartmentModel>("Department", departmentSchema);
+const Department = (models?.Department ||
+  model<IDepartment, IDepartmentModel>(
+    "Department",
+    departmentSchema
+  )) as IDepartmentModel;
 
 export default Department;

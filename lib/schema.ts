@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { timezones } from "./constants";
-import { timeOverlap } from "./utils";
+import { DayName } from "@/types";
 
 // time formate hrs:min am/pm
 export const timeFormat = /^(0?[1-9]|1[0-2]):[0-5][0-9](am|pm)$/;
@@ -35,32 +35,21 @@ export const departmentSchema = z.object({
   avatar: z.string().optional(),
 });
 
+const dayNames: DayName[] = [
+  "monday",
+  "thursday",
+  "thursday",
+  "wednesday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
 export const scheduleSchema = z.object({
-  doctor: z.string().min(1),
-  bookingTimes: z.object({
-    monday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    tuesday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    wednesday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    thursday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    friday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    saturday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-    sunday: z.array(timeslotsSchema).refine((slots) => !timeOverlap(slots), {
-      message: "Error: some of the timeslots are overlapping!",
-    }),
-  }),
-  timezones: z.enum(timezones),
+  doctor: z.string().optional(),
+  workingDays: z.array(z.enum([...dayNames] as [DayName, ...DayName[]])),
+  timezone: z.enum(timezones).default("IST"),
+  maxBookingSlots: z.number().default(15),
 });
 
 export const doctorSchema = z.object({

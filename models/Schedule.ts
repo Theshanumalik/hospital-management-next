@@ -1,45 +1,57 @@
 import { Document, model, Model, models, Schema, Types } from "mongoose";
 import Doctor from "./Doctor";
-import { timeFormat } from "@/lib/schema";
 import { DayName } from "@/types";
 import { timezones } from "@/lib/constants";
 
-export interface ITimeSlot {
-  startTime: string;
-  endTime: string;
-}
-interface ITimeSlotDoc extends ITimeSlot, Document {}
+// export interface ITimeSlot {
+//   startTime: string;
+//   endTime: string;
+// }
+// interface ITimeSlotDoc extends ITimeSlot, Document {}
 
-export const timeSlotSchema = new Schema<ITimeSlot, ITimeSlotDoc>({
-  startTime: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function (v: string) {
-        return /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(v);
-      },
-      message: "Invalid time format",
-    },
-  },
-  endTime: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function (v: string) {
-        return timeFormat.test(v);
-      },
-      message: "Invalid time format",
-    },
-  },
-});
+// export const timeSlotSchema = new Schema<ITimeSlot, ITimeSlotDoc>({
+//   startTime: {
+//     type: String,
+//     required: true,
+//     validate: {
+//       validator: function (v: string) {
+//         return /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(v);
+//       },
+//       message: "Invalid time format",
+//     },
+//   },
+//   endTime: {
+//     type: String,
+//     required: true,
+//     validate: {
+//       validator: function (v: string) {
+//         return timeFormat.test(v);
+//       },
+//       message: "Invalid time format",
+//     },
+//   },
+// });
 
 interface ISchedule {
   doctor: Types.ObjectId;
+  // bookingTimes: {
+  //   [key in DayName]: ITimeSlot[];
+  // };
   bookingTimes: {
-    [key in DayName]: ITimeSlot[];
+    [key in DayName]: number;
   };
   timezone: string;
 }
+
+export const daynames: DayName[] = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "wednesday",
+];
 
 interface IScheduleDoc extends ISchedule, Document {}
 
@@ -52,14 +64,23 @@ const scheduleSchema = new Schema<ISchedule, IScheduleModel>({
     required: true,
     unique: true,
   },
+  // bookingTimes: {
+  //   monday: [timeSlotSchema],
+  //   tuesday: [timeSlotSchema],
+  //   wednesday: [timeSlotSchema],
+  //   thursday: [timeSlotSchema],
+  //   friday: [timeSlotSchema],
+  //   saturday: [timeSlotSchema],
+  //   sunday: [timeSlotSchema],
+  // },
   bookingTimes: {
-    monday: [timeSlotSchema],
-    tuesday: [timeSlotSchema],
-    wednesday: [timeSlotSchema],
-    thursday: [timeSlotSchema],
-    friday: [timeSlotSchema],
-    saturday: [timeSlotSchema],
-    sunday: [timeSlotSchema],
+    sunday: { type: Number, default: 0 },
+    monday: { type: Number, default: 0 },
+    tuesday: { type: Number, default: 0 },
+    thursday: { type: Number, default: 0 },
+    wednesday: { type: Number, default: 0 },
+    friday: { type: Number, default: 0 },
+    saturday: { type: Number, default: 0 },
   },
   timezone: {
     type: String,
@@ -110,7 +131,7 @@ scheduleSchema.pre<IScheduleDoc>("save", async function (next) {
 // );
 
 const Schedule: IScheduleModel =
-  (models.Schedule as IScheduleModel) ||
+  (models?.Schedule as IScheduleModel) ||
   model<ISchedule, IScheduleModel>("Schedule", scheduleSchema);
 
 export default Schedule;

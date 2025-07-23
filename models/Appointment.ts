@@ -1,12 +1,12 @@
 import { Schema } from "mongoose";
 import { Types, Model, Document, model, models } from "mongoose";
-import { ITimeSlot, timeSlotSchema } from "./Schedule";
+// import { ITimeSlot, timeSlotSchema } from "./Schedule";
 
 interface IAppointment {
   patient: Types.ObjectId;
   doctor: Types.ObjectId;
   date: Date;
-  timeslot: ITimeSlot;
+  // timeslot: ITimeSlot;
   reason: string;
   status: "pending" | "approved" | "rejected" | "completed";
   name: string;
@@ -33,10 +33,10 @@ const appointmentSchema = new Schema<IAppointment, IAppointmentModel>({
     type: Date,
     required: true,
   },
-  timeslot: {
-    type: timeSlotSchema,
-    required: true,
-  },
+  // timeslot: {
+  //   type: timeSlotSchema,
+  //   required: true,
+  // },
   reason: {
     type: String,
   },

@@ -1,3 +1,5 @@
 ## TODOs
 
-- Fix Doctor Model (fullname instead of first and last name)
+13/7/25
+Update doctor schedule schema []
+adjust schedule page

@@ -11,7 +11,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <SidebarInset>
           <div className="h-[calc(100vh-70px)]">
             <Navbar />
-            <div className="flex-1 p-3 bg-gray-50 min-h-full overflow-x-auto">
+            <div className="flex-1 p-3 bg-gray-100 min-h-full overflow-x-auto">
               {children}
             </div>
           </div>

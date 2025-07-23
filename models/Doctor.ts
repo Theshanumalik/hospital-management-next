@@ -115,7 +115,7 @@ doctorSchema.methods.setSchedule = async function (scheduleId: string) {
 };
 
 const Doctor: IDoctorModel =
-  (models.Doctor as IDoctorModel) ||
+  (models?.Doctor as IDoctorModel) ||
   model<IDoctor, IDoctorModel>("Doctor", doctorSchema);
 
 export default Doctor;
